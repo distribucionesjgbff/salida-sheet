@@ -1,0 +1,22 @@
+{
+  "name": "ml-stock-sync",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "sync": "npm start -- incremental",
+    "import": "npm start -- full_import",
+    "mirror": "npm start -- mirror",
+    "migrate": "node --env-file-if-exists=.env scripts/migrate.js",
+    "test": "node --test",
+    "check": "node scripts/check.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "googleapis": "^171.0.0",
+    "pg": "^8.0.0"
+  },
+  "devDependencies": { "@electric-sql/pglite": "^0.3.0" }
+}
