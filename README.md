@@ -2,7 +2,7 @@
 
 Backend Node.js 24 para Railway, con Supabase como base operativa y Google Sheets como espejo. Incluye importación inicial, refresh selectivo, incremental, push, OAuth persistente, migración SQL y pruebas. Promociones, ventas y agrupación por SKU quedan fuera de esta fase.
 
-**Estado de entrega:** código y configuración preparados; ninguna cuenta remota fue modificada. Aplicar la migración, autorizar ML, compartir la hoja y crear los dos servicios Railway requiere los accesos del proyecto. Las pruebas locales usan PostgreSQL mediante PGlite y dobles de las APIs; no acreditan una prueba contra el catálogo real.
+**Estado de configuración:** repositorio publicado y migración aplicada en Supabase, con acceso del backend y permisos verificados. La autorización de ML, el espejo y Railway se configuran por separado. Las pruebas locales usan PostgreSQL mediante PGlite y dobles de las APIs; no acreditan una prueba contra el catálogo real.
 
 ## Puesta en marcha
 
@@ -87,6 +87,8 @@ El refresh token de ML es de un solo uso. El backend lee el token vigente de `ml
 **Transición con Apps Script:** usar el mismo client ID/secret no implica compartir el mismo refresh token. No copiar el token activo que Apps Script continuará rotando. Obtener una autorización OAuth nueva para el backend y comprobar que ambas autorizaciones siguen funcionando. No revocar la autorización existente. La coexistencia de autorizaciones debe verificarse con la cuenta real; si ML invalida la anterior al reautorizar, mantener el motor nuevo detenido y resolver esa coexistencia antes de continuar. [ML: autenticación y autorización](https://developers.mercadolibre.com.ar/es_ar/saldo-de-la-cuenta/autenticacion-y-autorizacion).
 
 Para generar un token nuevo, usar el flujo OAuth de la app existente con su `redirect_uri` registrado, permisos de lectura/escritura y acceso offline; intercambiar el authorization code una sola vez contra `/oauth/token` desde un entorno privado. Si la app exige PKCE, conservar y enviar el `code_verifier` de ese flujo. Cargar el refresh recibido en las variables privadas, nunca en Git ni en el chat. El bootstrap no necesita copiar la planilla anterior.
+
+También se incluye `npm run authorize -- --ngrok`: requiere ngrok instalado y autenticado, y `ML_REDIRECT_URI` con el dominio `.ngrok-free.dev` registrado en ML. Levanta un receptor local en `127.0.0.1:8787`, abre el túnel y escribe el enlace para el vendedor en `.local/ml-authorization-url.txt`. El usuario abre ese enlace e inicia sesión en ML. El receptor verifica `state`, usa PKCE S256, canjea el código una sola vez y guarda los tokens directamente en `ml_auth` bajo el lease de sync. No requiere copiar un token al chat ni a `.env`. Se niega a reemplazar una autorización ya guardada. Cierra el receptor y el túnel al finalizar o después de 20 minutos; si vence, ejecutar el comando nuevamente y usar el enlace nuevo. Este helper es manual, no se ejecuta en los cron.
 
 No existe atomicidad entre el POST OAuth de ML y una escritura en Postgres. Antes de renovar se persiste `refresh_in_progress=true`. Un timeout, caída del proceso o respuesta ambigua deja esa marca para evitar reutilizar a ciegas un token consumido. Se reintenta la persistencia de la misma respuesta hasta tres veces; **no se reintenta el POST OAuth rotativo**. Esto es una excepción deliberada al wrapper de reintentos de ítems.
 

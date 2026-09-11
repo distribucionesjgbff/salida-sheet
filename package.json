@@ -10,6 +10,7 @@
     "import": "npm start -- full_import",
     "mirror": "npm start -- mirror",
     "migrate": "node --env-file-if-exists=.env scripts/migrate.js",
+    "authorize": "node --env-file-if-exists=.env scripts/authorize.js",
     "test": "node --test",
     "check": "node scripts/check.js"
   },
