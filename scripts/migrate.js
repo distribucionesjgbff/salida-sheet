@@ -2,7 +2,11 @@ import { readFile } from 'node:fs/promises';
 import pg from 'pg';
 
 if (!process.env.DATABASE_URL) throw new Error('Falta DATABASE_URL (solo necesaria para migrar)');
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 30000 });
+const connection = new URL(process.env.DATABASE_URL);
+if (process.env.SUPABASE_DB_PASSWORD) connection.password = process.env.SUPABASE_DB_PASSWORD;
+if (connection.password === '[YOUR-PASSWORD]' || decodeURIComponent(connection.password) === '[YOUR-PASSWORD]')
+  throw new Error('Completar SUPABASE_DB_PASSWORD en .env antes de migrar');
+const client = new pg.Client({ connectionString: connection.toString(), connectionTimeoutMillis: 30000 });
 try {
   await client.connect();
   const existing = await client.query("select to_regclass('public.items') as items, to_regclass('public.sync_runs') as runs, to_regclass('public.ml_auth') as auth");
