@@ -237,6 +237,35 @@ La coexistencia de una autorización nueva con Apps Script aún debe probarse. N
 
 Los valores privados están en `.env` del equipo original, excluido de Git. `.local/` también está excluido y contiene el certificado CA, logs temporales y enlaces de autorización vencidos. No copiar estos archivos a un repositorio ni a un prompt. El certificado CA local se configuró mediante `sslrootcert=.local/supabase-ca.crt`; no se deshabilitó la validación TLS. Para otro equipo, instalar/configurar el CA según las instrucciones de Supabase.
 
+### Ubicación exacta de las credenciales y accesos
+
+Archivo privado existente en la computadora de Fede:
+
+```text
+C:\Users\fede3\Documents\ChatGPT\Fase 1 alternativa\.env
+```
+
+Certificado CA utilizado por la conexión Postgres:
+
+```text
+C:\Users\fede3\Documents\ChatGPT\Fase 1 alternativa\.local\supabase-ca.crt
+```
+
+La otra conversación, si trabaja en esta misma computadora y tiene acceso a sus archivos, puede cargar las variables desde esa ruta absoluta para las operaciones autorizadas. No debe imprimir el contenido del archivo ni sus valores en logs, respuestas, capturas o commits. El `.env` contiene las credenciales configuradas de Supabase y el ID/secreto de ML; no contiene todavía una autorización OAuth ML válida ni las credenciales de Google.
+
+Si se ejecuta desde otro checkout, `sslrootcert=.local/supabase-ca.crt` dentro de `DATABASE_URL` es relativo al directorio de ejecución. Resolverlo en memoria contra el directorio original o usar una copia privada del certificado en el checkout nuevo; no editar el `.env` original para adaptar otro desarrollo. Mantener `PUSH_ENABLED=false`. Usar fixtures o una base separada para pruebas que modifiquen datos.
+
+La ruta local **no es un enlace de descarga**: una conversación en la nube u otra computadora no puede acceder a ella por recibir este documento. En ese caso, el propietario debe configurar las variables mediante el mecanismo privado del nuevo entorno. No enviar el contenido del `.env` en el prompt.
+
+Accesos web para el propietario:
+
+- Repositorio: https://github.com/distribucionesjgbff/salida-sheet
+- Panel Supabase: https://supabase.com/dashboard/project/ygqyrsheofrpopuyfxkm
+- API Keys Supabase: https://supabase.com/dashboard/project/ygqyrsheofrpopuyfxkm/settings/api-keys
+- Railway: no hay proyecto desplegado ni URL de panel propia registrados en esta implementación.
+
+Estas direcciones requieren iniciar sesión con una cuenta con permisos. Las credenciales del `.env` son de servicios/API; no son una cuenta de usuario para entrar a un panel web, que todavía no existe.
+
 El backend usa una clave privilegiada de servidor. Nunca ponerla en variables públicas de Vite/Next ni entregarla al navegador. El nombre actual de la variable corresponde a la clave legacy `service_role`; cualquier modernización a secret keys debe validarse aparte, sin abrir políticas públicas por comodidad.
 
 ## 8. Comandos, despliegue y espejo
@@ -309,6 +338,8 @@ Si se busca **otro motor alternativo**, usar checkout y base de desarrollo separ
 ## 11. Texto breve para iniciar otra conversación
 
 > Estoy desarrollando un sistema de stock para Mercado Libre Argentina. El motor existente está en https://github.com/distribucionesjgbff/salida-sheet, rama main. Es Node.js 24 con Supabase/PostgreSQL, jobs previstos en Railway y Google Sheets como espejo. Todavía no existe panel, login ni API HTTP administrativa. La migración ya está aplicada, la base tiene cero ítems y OAuth ML está pendiente. Quiero trabajar una implementación complementaria o alternativa en paralelo. Leé este documento completo y el SQL antes de proponer cambios. Si construimos un panel, debe respetar las cantidades por ID de variación, el trigger de pendientes y stock_revision; mantener las credenciales en servidor y nunca exponer ml_auth. No implementar promociones, ventas ni agrupación por SKU en esta etapa. No modificar Apps Script, no recrear la base existente y no activar otro escritor de stock. Separá claramente lo que ya existe de lo que vas a crear. Trabajá en un checkout separado.
+
+> En esta computadora, el documento completo está en `C:\Users\fede3\Documents\ChatGPT\Fase 1 alternativa\docs\TRASPASO_BACKEND.md` y las variables privadas en `C:\Users\fede3\Documents\ChatGPT\Fase 1 alternativa\.env`. Podés cargar esas variables localmente para las operaciones de integración autorizadas, sin mostrar ni publicar su contenido y sin modificar el archivo original. El certificado está en `C:\Users\fede3\Documents\ChatGPT\Fase 1 alternativa\.local\supabase-ca.crt`; resolvé su ruta al trabajar desde otro checkout. Conservá `PUSH_ENABLED=false`. Si no tenés acceso al filesystem de esta computadora, solicitá que configure las variables en el entorno privado correspondiente, no que pegue secretos en el chat.
 
 ## 12. Esquema SQL exacto
 
